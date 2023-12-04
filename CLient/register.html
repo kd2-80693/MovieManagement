@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Document</title>
+    <script src="jquery-3.7.1.min.js"></script>
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        
+        
+        function RegisterMe()
+        {
+            var refTofnameBox = document.getElementById("fnameBox");
+            var refTolnameBox = document.getElementById("lnameBox");
+            var refTouserBox = document.getElementById("userBox");
+            var refTofphBox= document.getElementById("phBox");
+            var refTopassBox = document.getElementById("passBox");
+            var refTodobBox = document.getElementById("dobBox");
+            var cred = {
+                fnam : refTofnameBox.value,
+                lnam : refTolnameBox.value,
+                mob : refTofphBox.value,
+                date : refTodobBox.value,
+                user : refTouserBox.value,
+                pass : refTopassBox.value
+            }
+            var helper =  new XMLHttpRequest();
+            // debugger;
+            helper.onreadystatechange = () => {
+                console.log(helper.readyState + " - " + helper.status)
+                if(helper.readyState == 4 && helper.status == 200)
+                {
+                    console.log("in readystate == 4")
+                    var data = JSON.parse(helper.responseText);
+                    console.log(data)
+                    if(data.status == "success")
+                    {
+                        window.location.href = "http://127.0.0.1:5500/login.html";
+                    }
+                    else
+                    {
+                        alert("INVALID values , PLease enter correct values")
+                    }
+                }
+            };
+            helper.open("POST" , "http://127.0.0.1:9999/register")
+            helper.setRequestHeader("Content-Type" , "application/json")
+            helper.send(JSON.stringify(cred));
+        }
+    </script>
+</head>
+
+<body>
+    <link rel="stylesheet" href="styleforregiste.css">
+
+
+    <div class="container">
+        <hr>
+
+
+
+
+
+        <div class="card bg-light">
+            <article class="card-body mx-auto" style="max-width: 400px;">
+                <h4 class="card-title mt-3 text-center">Create Account</h4>
+                <p class="text-center">Get started with your free account</p>
+                <p>
+                    <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-twitter"></i>   Login via Twitter</a>
+                    <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via
+                        facebook</a>
+                </p>
+                <p class="divider-text">
+                    <span class="bg-light">OR</span>
+                </p>
+                <form>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                        </div>
+                        <input name="" class="form-control" placeholder="First name" type="text" id="fnameBox">
+                    </div>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                        </div>
+                        <input name="" class="form-control" placeholder="Last name" type="text" id="lnameBox">
+                    </div>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+                        </div>
+                        <input name="" class="form-control" placeholder="Username" type="email" id = "userBox">
+                    </div> <!-- form-group// -->
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
+                        </div>
+                        <select class="custom-select" style="max-width: 120px;">
+                            <option selected="">+91</option>
+                            <option value="1">+92</option>
+                            <option value="2">+18</option>
+                            <option value="3">+71</option>
+                        </select>
+                        <input name="" class="form-control" placeholder="Phone number" type="text" id="phBox">
+                    </div> <!-- form-group// -->
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                        </div>
+                        <input name="" class="form-control" placeholder="YYYY-MM-DD exact plzs" type="text"
+                            id="dobBox">
+                    </div>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                        </div>
+                        <input class="form-control" placeholder="Create password" type="password" id = "passBox">
+                    </div> <!-- form-group// -->
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                        </div>
+                        <input class="form-control" placeholder="Repeat password" type="password" >
+                    </div> <!-- form-group// -->
+                    <div >
+                        <button type="button" class="btn btn-primary btn-block" onclick="RegisterMe()"> Create Account
+                        </button>
+                    </div> <!-- form-group// -->
+                    <p class="text-center">Have an account? <a href="http://127.0.0.1:5500/login.html">Log In</a> </p>
+                </form>
+            </article>
+        </div> <!-- card.// -->
+
+    </div>
+    <!--container end.//-->
+    <br><br>
+    
+</body>
+
+</html>

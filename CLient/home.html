@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Document</title>
+    <script src="jquery-3.7.1.min.js"></script>
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet'
+        type='text/css'>
+    <script src="https://code.jquery.com/jquery-2.2.4.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+</head>
+
+
+<body onload="GetRecords()">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-10 col-md-offset-1">
+
+                <div class="panel panel-default panel-table">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col col-xs-6">
+                                <h3 class="panel-title">Movies</h3>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="panel-body table-responsive">
+                        <table class="table table-striped table-bordered table-list">
+                            <thead>
+                                <tr>
+                                    <th><em class="fa fa-cog"></em></th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Release</th>
+
+                                </tr>
+                                <tr>
+                                    <th align="center">
+                                        <a class="btn btn-danger" onclick="AddRecord()">ADD A MOVIE</a>
+                                        <a class="btn btn-danger" style="display:none" onclick="editRecord()"
+                                            id="editBtn">EDIT</a>
+                                    </th>
+                                    <th><input class="form-control" placeholder="ID" type="number" id="idBox"></th>
+                                    <th><input class="form-control" placeholder="Title" type="text" id="titleBox"></th>
+                                    <th><input class="form-control" placeholder="Release" type="number" id="releaseBox">
+                                    </th>
+
+                                </tr>
+                                <center>
+                                    <div id="myDiv" style="background-color:yellow;"></div>
+                                </center>
+                            </thead>
+                            <tbody id="myTable">
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div class="panel-footer">
+                        <div class="row">
+
+                            <div class="col col-xs-4">Page 1 of 5
+                            </div>
+                            <div class="col col-xs-8">
+                                <ul class="pagination hidden-xs pull-right" id="myPager">
+                                </ul>
+                                <ul class="pagination visible-xs pull-right">
+                                    <li><a href="#">«</a></li>
+                                    <li><a href="#">»</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        $.fn.pageMe = function (opts) {
+            var $this = this,
+                defaults = {
+                    perPage: 7,
+                    showPrevNext: false,
+                    hidePageNumbers: false
+                },
+                settings = $.extend(defaults, opts);
+
+            var listElement = $this;
+            var perPage = settings.perPage;
+            var children = listElement.children();
+            var pager = $('.pager');
+
+            if (typeof settings.childSelector != "undefined") {
+                children = listElement.find(settings.childSelector);
+            }
+
+            if (typeof settings.pagerSelector != "undefined") {
+                pager = $(settings.pagerSelector);
+            }
+
+            var numItems = children.size();
+            var numPages = Math.ceil(numItems / perPage);
+
+            pager.data("curr", 0);
+
+            if (settings.showPrevNext) {
+                $('<li><a href="#" class="prev_link">«</a></li>').appendTo(pager);
+            }
+
+            var curr = 0;
+            while (numPages > curr && (settings.hidePageNumbers == false)) {
+                $('<li><a href="#" class="page_link">' + (curr + 1) + '</a></li>').appendTo(pager);
+                curr++;
+            }
+
+            if (settings.showPrevNext) {
+                $('<li><a href="#" class="next_link">»</a></li>').appendTo(pager);
+            }
+
+            pager.find('.page_link:first').addClass('active');
+            pager.find('.prev_link').hide();
+            if (numPages <= 1) {
+                pager.find('.next_link').hide();
+            }
+            pager.children().eq(1).addClass("active");
+
+            children.hide();
+            children.slice(0, perPage).show();
+
+            pager.find('li .page_link').click(function () {
+                var clickedPage = $(this).html().valueOf() - 1;
+                goTo(clickedPage, perPage);
+                return false;
+            });
+            pager.find('li .prev_link').click(function () {
+                previous();
+                return false;
+            });
+            pager.find('li .next_link').click(function () {
+                next();
+                return false;
+            });
+
+            function previous() {
+                var goToPage = parseInt(pager.data("curr")) - 1;
+                goTo(goToPage);
+            }
+
+            function next() {
+                goToPage = parseInt(pager.data("curr")) + 1;
+                goTo(goToPage);
+            }
+
+            function goTo(page) {
+                var startAt = page * perPage,
+                    endOn = startAt + perPage;
+
+                children.css('display', 'none').slice(startAt, endOn).show();
+
+                if (page >= 1) {
+                    pager.find('.prev_link').show();
+                }
+                else {
+                    pager.find('.prev_link').hide();
+                }
+
+                if (page < (numPages - 1)) {
+                    pager.find('.next_link').show();
+                }
+                else {
+                    pager.find('.next_link').hide();
+                }
+
+                pager.data("curr", page);
+                pager.children().removeClass("active");
+                pager.children().eq(page + 1).addClass("active");
+
+            }
+        };
+
+        $(document).ready(function () {
+
+            $('#myTable').pageMe({ pagerSelector: '#myPager', showPrevNext: true, hidePageNumbers: false, perPage: 5 });
+
+        });
+    </script>
+    <script>
+        function GetRecords() {
+            // debugger;
+            if (window.localStorage.getItem("token") != null || window.sessionStorage.getItem("token") != null) {
+                var helper = new XMLHttpRequest();
+                helper.onreadystatechange = () => {
+                    if (helper.readyState == 4 && helper.status == 200) {
+                        if (helper.responseText == "error") {
+                            window.location.href = "http://127.0.0.1:5500/login.html";
+                        }
+                        else {
+                            var data = JSON.parse(helper.responseText);
+                            var refToTbody = document.getElementById("myTable")
+                            refToTbody.innerHTML = ""
+
+                            for (var i = 0; i < data.length; i++) {
+                                var row = `<tr>
+                                    <td align="center">
+                                        <a class="btn btn-default" onclick = "showEdit(${data[i].id},'${data[i].title}','${data[i].releas}')"><em class="fa fa-pencil"></em></a>
+                                        <a class="btn btn-danger" onclick = "deleteRecord(${data[i].id})"><em class="fa fa-trash"></em></a>
+                                    </td>
+                                    <td >${data[i].id}</td>
+                                    <td>${data[i].title}</td>
+                                    <td>${data[i].releas}</td>
+
+                                </tr>`
+                                refToTbody.innerHTML += row;
+                            }
+                        }
+                    }
+                }
+
+                helper.open("GET", "http://127.0.0.1:9999/home/");
+                if (window.localStorage.getItem("token") != null) {
+                    helper.setRequestHeader("authorization", window.localStorage.getItem("token"));
+                }
+                else {
+                    helper.setRequestHeader("authorization", window.sessionStorage.getItem("token"));
+                }
+                helper.send()
+            }
+            else {
+                window.location.href = "http://127.0.0.1:5500/login.html";
+            }
+
+        }
+
+        function AddRecord() {
+
+            var refToId = document.getElementById("idBox");
+            var refToTitle = document.getElementById("titleBox");
+            var refToAdd = document.getElementById("releaseBox");
+
+            var objToSend = {
+                id: refToId.value,
+                title: refToTitle.value,
+                releas: refToAdd.value
+            }
+
+            var helper = new XMLHttpRequest();
+            helper.onreadystatechange = () => {
+                if (helper.readyState == 4 && helper.status == 200) {
+                    if (helper.responseText == "error") {
+                        var refToDiv = document.getElementById("myDiv")
+                        refToDiv.innerText = "Wrong Values Try Again";
+                        window.setTimeout(() => {
+                            var refToDiv = document.getElementById("myDiv")
+                            refToDiv.innerText = "";
+                            GetRecords();
+                        }, 2000)
+                    }
+                    else {
+                        var refToDiv = document.getElementById("myDiv")
+                        refToDiv.innerText = "Added Successfully ";
+                        window.setTimeout(() => {
+                            var refToDiv = document.getElementById("myDiv")
+                            refToDiv.innerText = "";
+                            GetRecords();
+                            refToId.value = "";
+                            refToTitle.value = "";
+                            refToAdd.value = "";
+                        }, 2000)
+                    }
+                }
+            }
+            helper.open("POST", "http://127.0.0.1:9999/home");
+            if (window.localStorage.getItem("token") != null) {
+                helper.setRequestHeader("authorization", window.localStorage.getItem("token"));
+            }
+            else {
+                helper.setRequestHeader("authorization", window.sessionStorage.getItem("token"));
+            }
+            helper.setRequestHeader("content-type", "application/json")
+            helper.send(JSON.stringify(objToSend));
+        }
+
+        function deleteRecord(no) {
+
+            var helper = new XMLHttpRequest()
+            helper.onreadystatechange = () => {
+
+                if (helper.readyState == 4 && helper.status == 200) {
+                    if (helper.responseText == "error") {
+                        var refToDiv = document.getElementById("myDiv")
+                        refToDiv.innerText = "Some Error Occured";
+                        window.setTimeout(() => {
+                            var refToDiv = document.getElementById("myDiv")
+                            refToDiv.innerText = "";
+                            GetRecords();
+                        }, 2000)
+
+
+                    }
+                    else {
+                        var refToDiv = document.getElementById("myDiv")
+                        refToDiv.innerText = "Deleted successfully ";
+                        window.setTimeout(() => {
+                            var refToDiv = document.getElementById("myDiv")
+                            refToDiv.innerText = "";
+                            GetRecords();
+                        }, 2000)
+                    }
+                }
+            }
+            helper.open("Delete", "http://127.0.0.1:9999/home/" + no);
+            if (window.localStorage.getItem("token") != null) {
+                helper.setRequestHeader("authorization", window.localStorage.getItem("token"));
+            }
+            else {
+                helper.setRequestHeader("authorization", window.sessionStorage.getItem("token"));
+            }
+            helper.send();
+        }
+
+        function showEdit(no, name, sal) {
+
+            var refToEditButton = document.getElementById("editBtn");
+            refToEditButton.style.display = "inline";
+            var refToId = document.getElementById("idBox");
+            var refToTitle = document.getElementById("titleBox");
+            var refToAdd = document.getElementById("releaseBox");
+            refToId.value = no;
+            refToTitle.value = name;
+            refToAdd.value = sal;
+
+        }
+
+        function editRecord() {
+            var refToId = document.getElementById("idBox");
+            var refToTitle = document.getElementById("titleBox");
+            var refToAdd = document.getElementById("releaseBox");
+            console.log(refToId.value)
+
+            var objToSend = {
+                title: refToTitle.value,
+                add: refToAdd.value
+            }
+
+            var helper = new XMLHttpRequest();
+            helper.onreadystatechange = () => {
+                if (helper.readyState == 4 && helper.status == 200) {
+                    if (helper.responseText == "error") {
+                        var refToDiv = document.getElementById("myDiv")
+                        refToDiv.innerText = "Wrong Values Try Again";
+                        window.setTimeout(() => {
+                            var refToDiv = document.getElementById("myDiv")
+                            refToDiv.innerText = "";
+                            GetRecords();
+                        }, 2000)
+                    }
+                    else {
+
+                        var refToDiv = document.getElementById("myDiv")
+                        refToDiv.innerText = "Edited Successfully ";
+                        window.setTimeout(() => {
+                            var refToDiv = document.getElementById("myDiv")
+                            refToDiv.innerText = "";
+                            GetRecords();
+                            refToId.value = "";
+                            refToTitle.value = "";
+                            refToAdd.value = "";
+                        }, 2000)
+                    }
+                }
+            }
+            console.log(refToId.value)
+            helper.open("PUT", "http://127.0.0.1:9999/home/" + refToId.value);
+            if (window.localStorage.getItem("token") != null) {
+                helper.setRequestHeader("authorization", window.localStorage.getItem("token"));
+            }
+            else {
+                helper.setRequestHeader("authorization", window.sessionStorage.getItem("token"));
+            }
+            helper.setRequestHeader("content-type", "application/json")
+            helper.send(JSON.stringify(objToSend));
+        }
+    </script>
+</body>
+
+</html>
